@@ -1,3 +1,3 @@
 export interface Converter {
-  convert: () => any;
+  convert: (from: any) => any;
 }
