@@ -1,1 +1,3 @@
-export class Converter {}
+export interface Converter {
+  convert: () => any;
+}
