@@ -1,3 +1,3 @@
-export interface Converter {
-  convert: (from: any) => any;
+export interface Converter<S, T> {
+  convert: (from: S) => T;
 }

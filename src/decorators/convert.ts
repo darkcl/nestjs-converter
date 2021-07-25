@@ -10,21 +10,15 @@ export const Convert = (
   to: NewableFunction | string
 ) => {
   return function _Convert<T extends { new (...args: any[]): {} }>(constr: T) {
-    const wrappedConstructor: any = class extends constr {
-      constructor(...args: any[]) {
-        super(...args);
-        GlobalConverterRegistry.register({
-          from,
-          to,
-          converter: <Converter>(<unknown>this),
-        });
-      }
-    };
+    if (!constr.prototype["convert"])
+      throw new Error(`${constr.name} does not implement function: convert`);
 
-    Object.defineProperty(wrappedConstructor, "name", {
-      value: constr.name,
-      writable: false,
+    GlobalConverterRegistry.register({
+      from,
+      to,
+      convertFn: constr.prototype.convert,
     });
-    return wrappedConstructor;
+
+    return constr;
   };
 };

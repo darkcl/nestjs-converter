@@ -1,9 +1,11 @@
-import { Converter } from "./converter";
+import { getName } from "../utils";
+
+type ConvertFn = (source: any) => any;
 
 type RegisterOpts = {
   from: string | NewableFunction;
   to: string | NewableFunction;
-  converter: Converter;
+  convertFn: (source: any) => any;
 };
 
 type GetOpts = {
@@ -30,13 +32,13 @@ class ConverterRegistry {
    */
   private _convertersMap = {};
 
-  public register({ from, to, converter }: RegisterOpts) {
-    const fromName = this.getName(from);
-    const toName = this.getName(to);
+  public register({ from, to, convertFn }: RegisterOpts) {
+    const fromName = getName(from);
+    const toName = getName(to);
     const fromMap = this._convertersMap[fromName];
     if (!fromMap) {
       this._convertersMap[fromName] = {};
-      this._convertersMap[fromName][toName] = converter;
+      this._convertersMap[fromName][toName] = convertFn;
     } else {
       const toConverter = fromMap[toName];
       if (toConverter)
@@ -44,30 +46,23 @@ class ConverterRegistry {
           `Converter for ${fromName} to ${toName} already existed`
         );
 
-      fromMap[toName] = converter;
+      fromMap[toName] = convertFn;
     }
   }
 
-  public get({ from, to }: GetOpts): Converter {
-    const fromName = this.getName(from);
-    const toName = this.getName(to);
+  public get({ from, to }: GetOpts): ConvertFn {
+    const fromName = getName(from);
+    const toName = getName(to);
+
     const fromMap = this._convertersMap[fromName];
     if (!fromMap)
       throw new Error(`Converter for ${fromName} to ${toName} never exist`);
 
-    const toConverter = this._convertersMap[toName];
+    const toConverter = this._convertersMap[fromName][toName];
     if (!toConverter)
       throw new Error(`Converter for ${fromName} to ${toName} never exist`);
 
     return toConverter;
-  }
-
-  private getName(input: string | NewableFunction): string {
-    if (typeof input === "string" || input instanceof String) {
-      return <string>input;
-    }
-
-    return input.name;
   }
 }
 
