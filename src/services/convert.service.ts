@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import { GlobalConverterRegistry } from "../converter";
 import { getName } from "../utils";
 
@@ -7,6 +8,7 @@ type ConvertOpts = {
   to: NewableFunction | string;
 };
 
+@Injectable()
 export class ConvertService {
   public convert({ source, from, to }: ConvertOpts) {
     const convertFn = GlobalConverterRegistry.get({
